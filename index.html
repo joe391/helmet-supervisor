@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1b1f24">
+<title>Helmet supervisor</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <h1>Helmet supervisor</h1>
+  <span id="srcBadge" class="badge" hidden></span>
+</header>
+
+<div id="offline" class="banner warn" role="status" hidden></div>
+<div id="stale" class="banner warn" role="status" hidden></div>
+
+<main>
+  <section id="screen-now" class="screen">
+    <div id="tile" class="tile s-none" aria-live="polite">
+      <div id="tileLabel" class="tile-label">Waiting for data</div>
+      <div id="tileText" class="tile-text"></div>
+    </div>
+    <p id="updated" class="updated">Last update: &ndash;</p>
+    <div id="testNote" class="banner test" hidden>TEST DATA: this point was sent by a test tool, not by a worker's helmet.</div>
+    <dl class="grid">
+      <div class="cell"><dt>Estimated core temperature</dt><dd id="v-ct">&ndash;</dd></div>
+      <div class="cell"><dt>PSI</dt><dd id="v-psi">&ndash;</dd></div>
+      <div class="cell"><dt>Heart rate</dt><dd id="v-hr">&ndash;</dd></div>
+      <div class="cell"><dt>Red probability</dt><dd id="v-pred">&ndash;</dd></div>
+      <div class="cell"><dt>Ambient temperature</dt><dd id="v-amb">&ndash;</dd></div>
+      <div class="cell"><dt>Humidity</dt><dd id="v-rh">&ndash;</dd></div>
+    </dl>
+    <h2>Helmet status</h2>
+    <ul id="flags" class="flags"></ul>
+    <p id="schemaWarn" class="note" hidden></p>
+    <p id="skipped" class="note" hidden></p>
+  </section>
+
+  <section id="screen-trend" class="screen" hidden>
+    <p id="trendInfo" class="note"></p>
+    <h2>Estimated core temperature</h2>
+    <div id="chart-ct"></div>
+    <h2>Heart rate</h2>
+    <div id="chart-hr"></div>
+    <h2>PSI</h2>
+    <div id="chart-psi"></div>
+    <ul class="legend" aria-label="Colour band legend">
+      <li><i class="sw b-green"></i>Green</li><li><i class="sw b-yellow"></i>Yellow</li><li><i class="sw b-red"></i>Red</li>
+      <li><i class="sw b-fault"></i>Fault</li><li><i class="sw b-notcal"></i>Not calibrated</li>
+    </ul>
+    <h2>Last 20 minutes</h2>
+    <div class="tablewrap">
+      <table id="table">
+        <thead><tr><th>Time</th><th>State</th><th>Core &deg;C</th><th>HR</th><th>PSI</th><th>Amb &deg;C</th><th>RH %</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="screen-about" class="screen" hidden>
+    <h2>What this is</h2>
+    <p>The smart helmet gives a <strong>heat-strain risk warning</strong>. It is <strong>not a diagnosis</strong>. It works from an
+    <em>estimated</em> core temperature, calculated from heart rate, motion and the surroundings, so it can be wrong.</p>
+    <h2>How to read the state</h2>
+    <ul class="states">
+      <li><i class="sw b-green"></i><b>Green</b>: no heat-strain risk warning.</li>
+      <li><i class="sw b-yellow"></i><b>Yellow</b>: raised risk.</li>
+      <li><i class="sw b-red"></i><b>Red</b>: risk warning; the helmet also sounds its buzzer.</li>
+      <li><i class="sw b-fault"></i><b>Fault</b>: a needed sensor is down, or the helmet has no risk output. Check the helmet.</li>
+      <li><i class="sw b-notcal"></i><b>Not calibrated</b>: no valid baseline; only the simpler fallback rule runs.</li>
+    </ul>
+    <p>The state shown is the one the worker sees on the helmet LED. Red probability is empty when the fallback rule decided.
+    A grey "Test point" is a message from a test tool.</p>
+    <h2>Data source</h2>
+    <p>The badge at the top says where the data came from: <b>real</b> (a helmet), <b>sim</b> (simulated workers) or <b>test</b>
+    (test tool). Simulated data is never real worker data.</p>
+    <h2>Limits</h2>
+    <ul>
+      <li>This is a heat-strain <b>risk warning, not a diagnosis</b>. A worker who feels unwell must be treated as unwell whatever the colour.</li>
+      <li>The core temperature is <b>estimated</b>, not measured.</li>
+      <li><b>Skin temperature is not shown</b> in this app.</li>
+      <li>Data is at most one point per minute and can arrive late. After a 3 minute silence the app warns that the data is stale.</li>
+      <li>The helmet clock has no battery: if its status says "clock not synchronised", the times can be wrong.</li>
+    </ul>
+    <p class="note">Data: ThingSpeak channel <span id="chanId"></span>, read-only. Times are shown in your local time.</p>
+  </section>
+</main>
+
+<nav class="tabs" aria-label="Screens">
+  <a href="#now" id="tab-now" class="tab" aria-current="page">Now</a>
+  <a href="#trend" id="tab-trend" class="tab">Trend</a>
+  <a href="#about" id="tab-about" class="tab">About</a>
+</nav>
+
+<script src="config.js"></script>
+<script src="lib.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
